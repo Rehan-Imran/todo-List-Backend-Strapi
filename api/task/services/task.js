@@ -34,4 +34,14 @@ module.exports = {
       throw error;
     }
   },
+  async createTask(body, users_permissions_user) {
+    try {
+      let task = await strapi
+        .query("task")
+        .create({ ...body, users_permissions_user });
+      return task;
+    } catch (errror) {
+      throw error;
+    }
+  },
 };

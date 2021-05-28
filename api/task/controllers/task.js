@@ -39,36 +39,27 @@ module.exports = {
     const { id } = ctx.params;
 
     const entity = await taskService.findOneTask(id, user.id);
-    const array = Object.values(stat);
     const existingState = entity.status.toLowerCase();
-    const indexOfExistingState = array.indexOf(existingState);
-
+    const indexOfExistingState = stat.indexOf(existingState);
+    let finalBody;
     let entiti;
     let state = false;
-    if (array[indexOfExistingState]) {
-      if (
-        array[indexOfExistingState + 1] &&
-        array[indexOfExistingState + 1] === ctx.request.body.status &&
-        ctx.request.body.status === "inprogress"
-      ) {
-        ctx.request.body.start_date = await helper.getDateTime();
-        state = true;
-      } else if (
-        array[indexOfExistingState + 1] &&
-        array[indexOfExistingState + 1] === ctx.request.body.status &&
-        ctx.request.body.status === "done"
-      ) {
-        ctx.request.body.completion_date = await helper.getDateTime();
-        state = true;
-      } else if (
-        !array[indexOfExistingState + 1] &&
-        ctx.request.body.status === "todo"
-      ) {
-        state = true;
-      }
+    finalBody = await helper.checkStatus(
+      stat,
+      indexOfExistingState,
+      ctx.request.body
+    );
+    if (finalBody) {
+      state = true;
+    } else if (
+      !stat[indexOfExistingState + 1] &&
+      ctx.request.body.status === "todo"
+    ) {
+      finalBody = ctx.request.body;
+      state = true;
     }
     if (state === true) {
-      entiti = await taskService.updateTask(id, user.id, ctx.request.body);
+      entiti = await taskService.updateTask(id, user.id, finalBody);
       return sanitizeEntity(entiti, { model: strapi.models.task });
     } else {
       return ctx.badRequest("No condition Satisfied");
