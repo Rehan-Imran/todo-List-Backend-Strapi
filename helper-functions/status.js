@@ -1,7 +1,3 @@
-const status = {
-  status1: "todo",
-  status2: "inprogress",
-  status3: "done",
-};
+const status = ["todo", "inprogress", "done"];
 
 module.exports = status;
